@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Activity,
-  Brain,
-  LineChart,
-  Users,
-  Camera,
-  Shield,
+import { 
+  Activity, 
+  Brain, 
+  LineChart, 
+  Users, 
+  Camera, 
+  Shield, 
   ChevronRight,
   Menu,
   X,
@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Check
 } from 'lucide-react';
+import { auth } from '../config/firebase';
 
 const HomePage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,6 +27,18 @@ const HomePage = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleStartTrial = () => {
+    window.location.href = '/register';
+  };
+
+  const handleWatchDemo = () => {
+    console.log('Opening demo video...');
+  };
+
+  const handleGetStarted = () => {
+    window.location.href = '/register';
+  };
 
   const features = [
     {
@@ -77,34 +90,37 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md' : 'bg-transparent'
-        }`}>
+      <nav className={`fixed w-full z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white shadow-md' : 'bg-transparent'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
             <div className="flex items-center">
-              <span className={`text-2xl font-bold transition-colors duration-300 ${isScrolled ? 'text-blue-600' : 'text-white'
-                }`}>MedRehab</span>
+              <span className={`text-2xl font-bold transition-colors duration-300 ${
+                isScrolled ? 'text-blue-600' : 'text-white'
+              }`}>MedRehab</span>
             </div>
 
-            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               {['Features', 'How it Works', 'Testimonials'].map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase().replace(' ', '-')}`}
-                  className={`transition-colors duration-300 ${isScrolled ? 'text-gray-600 hover:text-blue-600' : 'text-white hover:text-blue-200'
-                    }`}
+                  className={`transition-colors duration-300 ${
+                    isScrolled ? 'text-gray-600 hover:text-blue-600' : 'text-white hover:text-blue-200'
+                  }`}
                 >
                   {item}
                 </a>
               ))}
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+              <button 
+                onClick={handleGetStarted}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
                 Get Started
               </button>
             </div>
 
-            {/* Mobile menu button */}
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -117,7 +133,6 @@ const HomePage = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-800">
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -129,17 +144,22 @@ const HomePage = () => {
             Experience the future of physical rehabilitation with real-time feedback and personalized guidance.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-            <button className="px-8 py-4 bg-white text-blue-600 rounded-lg font-bold hover:bg-blue-50 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center">
+            <button 
+              onClick={handleStartTrial}
+              className="px-8 py-4 bg-white text-blue-600 rounded-lg font-bold hover:bg-blue-50 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center"
+            >
               Start Free Trial
               <ArrowRight className="ml-2 w-5 h-5" />
             </button>
-            <button className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transform hover:scale-105 transition-all duration-300 flex items-center justify-center">
+            <button 
+              onClick={handleWatchDemo}
+              className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transform hover:scale-105 transition-all duration-300 flex items-center justify-center"
+            >
               Watch Demo
               <Play className="ml-2 w-5 h-5" />
             </button>
           </div>
         </div>
-        {/* Animated scroll indicator */}
         <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
           <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
             <div className="w-2 h-2 bg-white rounded-full mt-2 animate-pulse"></div>
@@ -147,7 +167,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Features Section */}
       <div id="features" className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -161,7 +180,7 @@ const HomePage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <div
+              <div 
                 key={index}
                 className="group relative"
                 onMouseEnter={() => setActiveFeature(index)}
@@ -186,7 +205,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* How It Works Section */}
       <div id="how-it-works" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -224,7 +242,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* CTA Section */}
       <div className="relative py-24 bg-gradient-to-r from-blue-600 to-blue-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:flex lg:items-center lg:justify-between">
@@ -238,7 +255,10 @@ const HomePage = () => {
               </p>
             </div>
             <div className="mt-8 lg:mt-0 lg:ml-8">
-              <button className="w-full lg:w-auto px-8 py-4 bg-white text-blue-600 rounded-lg font-bold hover:bg-blue-50 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center">
+              <button 
+                onClick={handleGetStarted}
+                className="w-full lg:w-auto px-8 py-4 bg-white text-blue-600 rounded-lg font-bold hover:bg-blue-50 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center"
+              >
                 Get Started Now
                 <ArrowRight className="ml-2 w-5 h-5" />
               </button>
@@ -247,7 +267,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">

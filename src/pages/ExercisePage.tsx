@@ -1,79 +1,180 @@
-// src/pages/ExercisePage.tsx
-import { useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Play, Pause, Camera, RotateCcw } from 'lucide-react';
+import { Play, Pause, Camera, RotateCcw } from "lucide-react";
+import { useWebcam } from "../hooks/useWebcam";
+import * as poseDetection from '@tensorflow-models/pose-detection';
+import '@tensorflow/tfjs-backend-webgl';
 
 const ExercisePage = () => {
   const { id } = useParams();
   const [isStarted, setIsStarted] = useState(false);
+  const { videoRef, hasPermission, error, startWebcam, stopWebcam } = useWebcam();
+  const exerciseVideoRef = useRef<HTMLVideoElement>(null);
+  const webcamCanvasRef = useRef<HTMLCanvasElement>(null);
+  const exerciseCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [detector, setDetector] = useState<poseDetection.PoseDetector | null>(null);
+
+  useEffect(() => {
+    const initPoseDetection = async () => {
+      const model = poseDetection.SupportedModels.MoveNet;
+      const detectorConfig = {
+        modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
+      };
+      const detector = await poseDetection.createDetector(model, detectorConfig);
+      setDetector(detector);
+    };
+
+    initPoseDetection();
+  }, []);
+
+  const drawPose = (
+    poses: poseDetection.Pose[],
+    canvas: HTMLCanvasElement | null,
+    videoElement: HTMLVideoElement | null,
+    flipHorizontal = false
+  ) => {
+    if (!canvas || !videoElement) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Set canvas size to match video
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+
+    if (flipHorizontal) {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+
+    // Draw keypoints
+    poses.forEach(pose => {
+      pose.keypoints.forEach(keypoint => {
+        if (keypoint.score && keypoint.score > 0.3) {
+          ctx.beginPath();
+          ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
+          ctx.fillStyle = 'red';
+          ctx.fill();
+        }
+      });
+
+      // Draw connections
+      const connections = poseDetection.util.getAdjacentPairs(model);
+      connections.forEach(([i, j]) => {
+        const kp1 = pose.keypoints[i];
+        const kp2 = pose.keypoints[j];
+
+        if (kp1.score && kp2.score && kp1.score > 0.3 && kp2.score > 0.3) {
+          ctx.beginPath();
+          ctx.moveTo(kp1.x, kp1.y);
+          ctx.lineTo(kp2.x, kp2.y);
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = 'red';
+          ctx.stroke();
+        }
+      });
+    });
+
+    if (flipHorizontal) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+  };
+
+  useEffect(() => {
+    if (isStarted && detector) {
+      const interval = setInterval(async () => {
+        if (videoRef.current) {
+          const poses = await detector.estimatePoses(videoRef.current);
+          drawPose(poses, webcamCanvasRef.current, videoRef.current, true);
+        }
+        if (exerciseVideoRef.current) {
+          const poses = await detector.estimatePoses(exerciseVideoRef.current);
+          drawPose(poses, exerciseCanvasRef.current, exerciseVideoRef.current);
+        }
+      }, 100);
+
+      return () => clearInterval(interval);
+    }
+  }, [isStarted, detector]);
+
+  const handlePlayPause = () => {
+    if (isStarted) {
+      stopWebcam();
+      if (exerciseVideoRef.current) {
+        exerciseVideoRef.current.pause();
+      }
+    } else {
+      startWebcam();
+      if (exerciseVideoRef.current) {
+        exerciseVideoRef.current.play();
+      }
+    }
+    setIsStarted(!isStarted);
+  };
+
+  const handleReset = () => {
+    if (exerciseVideoRef.current) {
+      exerciseVideoRef.current.currentTime = 0;
+      exerciseVideoRef.current.pause();
+    }
+    stopWebcam();
+    setIsStarted(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Exercise Video Feed */}
-      <div className="relative h-[60vh] bg-black">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Camera className="w-16 h-16 text-gray-500" />
-          <p className="text-gray-500 mt-4">Camera feed will appear here</p>
+      <div className="flex h-full">
+        <div className="w-1/2 h-screen relative">
+          {isStarted ? (
+            <>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover transform -scale-x-100"
+              />
+              <canvas
+                ref={webcamCanvasRef}
+                className="absolute top-0 left-0 w-full h-full object-cover"
+              />
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-white">
+              <Camera className="w-16 h-16" />
+            </div>
+          )}
+        </div>
+        <div className="w-1/2 h-screen relative">
+          <video
+            ref={exerciseVideoRef}
+            src="/assets/videos/abc.mp4"
+            loop
+            className="w-full h-full object-cover"
+          />
+          <canvas
+            ref={exerciseCanvasRef}
+            className="absolute top-0 left-0 w-full h-full object-cover"
+          />
         </div>
 
-        {/* Controls Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/50 to-transparent">
           <div className="flex justify-center space-x-4">
             <button
-              className="p-4 rounded-full bg-white text-gray-900 hover:bg-gray-100"
-              onClick={() => setIsStarted(!isStarted)}
+              className="p-4 rounded-full bg-white text-gray-900 hover:bg-gray-100 transition-colors"
+              onClick={handlePlayPause}
             >
               {isStarted ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
             </button>
-            <button className="p-4 rounded-full bg-white text-gray-900 hover:bg-gray-100">
+            <button 
+              className="p-4 rounded-full bg-white text-gray-900 hover:bg-gray-100 transition-colors"
+              onClick={handleReset}
+            >
               <RotateCcw className="w-6 h-6" />
             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Exercise Information */}
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Exercise Name (ID: {id})
-          </h1>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold text-gray-700 mb-2">Sets Remaining</h3>
-              <p className="text-2xl font-bold text-blue-600">3/5</p>
-            </div>
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold text-gray-700 mb-2">Current Score</h3>
-              <p className="text-2xl font-bold text-green-600">85%</p>
-            </div>
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold text-gray-700 mb-2">Time Elapsed</h3>
-              <p className="text-2xl font-bold text-purple-600">05:30</p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Instructions</h3>
-              <p className="text-gray-600">
-                1. Stand straight with your feet shoulder-width apart<br />
-                2. Slowly raise your arms to shoulder height<br />
-                3. Hold for 5 seconds<br />
-                4. Lower your arms back to starting position<br />
-                5. Repeat for the specified number of sets
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Tips</h3>
-              <ul className="text-gray-600 list-disc list-inside">
-                <li>Keep your back straight throughout the exercise</li>
-                <li>Breathe steadily and naturally</li>
-                <li>Stop if you feel any pain or discomfort</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>

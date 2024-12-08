@@ -6,15 +6,22 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  UserCredential,
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { initializePatientDataWithSamples } from '../utils/initializeFirebaseData';
+import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<UserCredential>;
+  register: (email: string, password: string, userData: { 
+    firstName: string;
+    lastName: string;
+    role: 'doctor' | 'patient';
+  }) => Promise<UserCredential>;
   logout: () => Promise<void>;
 }
 
@@ -42,17 +49,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    return signInWithEmailAndPassword(auth, email, password);
   };
 
-  const register = async (email: string, password: string) => {
+  const register = async (email: string, password: string, userData: { 
+    firstName: string;
+    lastName: string;
+    role: 'doctor' | 'patient';
+  }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // Initialize patient data with samples after registration
-      await initializePatientDataWithSamples(userCredential.user.uid, email);
+      
+      // Save additional user data to Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        role: userData.role,
+        email: email,
+        createdAt: serverTimestamp()
+      });
+
+      return userCredential;
     } catch (error) {
-      console.error('Error during registration:', error);
-      throw error;
+      console.error('Error in register:', error);
+      throw error; // Re-throw to handle in the component
     }
   };
 

@@ -2,37 +2,46 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper functions
+    // Helper function to check if user is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
     
+    // Helper function to check if user is accessing their own data
     function isOwner(userId) {
-      return request.auth.uid == userId;
+      return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Patient data rules
-    match /patients/{userId} {
-      allow read: if isAuthenticated() && isOwner(userId);
-      allow create: if isAuthenticated() && isOwner(userId);
-      allow update: if isAuthenticated() && isOwner(userId);
+    // Add users collection rules
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Patient collection rules
+    match /patients/{patientId} {
+      allow read, write: if isOwner(patientId);
       
-      // Exercises subcollection
+      // Add specific rules for exercises subcollection
       match /exercises/{exerciseId} {
-        allow read: if isAuthenticated() && isOwner(userId);
-        allow write: if isAuthenticated() && isOwner(userId);
+        allow read, write: if isOwner(patientId);
       }
       
-      // Exercise history subcollection
+      // Add specific rules for exercise history subcollection
       match /exerciseHistory/{historyId} {
-        allow read: if isAuthenticated() && isOwner(userId);
-        allow write: if isAuthenticated() && isOwner(userId);
+        allow read, write: if isOwner(patientId);
       }
       
-      // Achievements subcollection
-      match /achievements/{achievementId} {
-        allow read: if isAuthenticated() && isOwner(userId);
-        allow write: if isAuthenticated() && isOwner(userId);
+      match /appointments/{appointmentId} {
+        allow read, write: if isOwner(patientId);
+      }
+    }
+
+    // Doctor collection rules
+    match /doctors/{doctorId} {
+      allow read, write: if isOwner(doctorId);
+      
+      match /patients/{patientId} {
+        allow read, write: if isOwner(doctorId);
       }
     }
   }

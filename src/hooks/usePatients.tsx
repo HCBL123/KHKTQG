@@ -1,33 +1,14 @@
 // src/hooks/usePatient.ts
 import { useState, useEffect } from 'react';
-import {
-  onSnapshot,
-  doc,
-  collection,
-  query,
-  where,
-  orderBy,
-  limit,
-  Timestamp
-} from 'firebase/firestore';
+import { doc, collection, query, onSnapshot, where, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
-import { PatientData, Exercise, ExerciseHistory } from '../types/patient';
 
-interface UsePatientReturn {
-  loading: boolean;
-  error: string | null;
-  patientData: PatientData | null;
-  upcomingExercises: Exercise[];
-  exerciseHistory: ExerciseHistory[];
-  refreshData: () => void;
-}
-
-export const usePatient = (): UsePatientReturn => {
+export const usePatient = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [patientData, setPatientData] = useState<PatientData | null>(null);
-  const [upcomingExercises, setUpcomingExercises] = useState<Exercise[]>([]);
-  const [exerciseHistory, setExerciseHistory] = useState<ExerciseHistory[]>([]);
+  const [patientData, setPatientData] = useState<any>(null);
+  const [exerciseHistory, setExerciseHistory] = useState<any[]>([]);
+  const [upcomingExercises, setUpcomingExercises] = useState<any[]>([]);
 
   useEffect(() => {
     if (!auth.currentUser) {
@@ -35,15 +16,14 @@ export const usePatient = (): UsePatientReturn => {
       return;
     }
 
+    const patientId = auth.currentUser.uid;
+
     // Subscribe to patient data
-    const patientUnsubscribe = onSnapshot(
-      doc(db, 'patients', auth.currentUser.uid),
+    const unsubscribePatient = onSnapshot(
+      doc(db, 'patients', patientId),
       (doc) => {
         if (doc.exists()) {
-          setPatientData({
-            id: doc.id,
-            ...doc.data()
-          } as PatientData);
+          setPatientData({ id: doc.id, ...doc.data() });
         } else {
           setError('Patient data not found');
         }
@@ -57,9 +37,9 @@ export const usePatient = (): UsePatientReturn => {
     );
 
     // Subscribe to upcoming exercises
-    const exercisesUnsubscribe = onSnapshot(
+    const unsubscribeExercises = onSnapshot(
       query(
-        collection(db, 'patients', auth.currentUser.uid, 'exercises'),
+        collection(db, 'patients', patientId, 'exercises'),
         where('nextSession', '>=', Timestamp.now()),
         orderBy('nextSession'),
         limit(10)
@@ -67,8 +47,10 @@ export const usePatient = (): UsePatientReturn => {
       (snapshot) => {
         const exercises = snapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
-        })) as Exercise[];
+          ...doc.data(),
+          nextSession: doc.data().nextSession?.toDate() || new Date(),
+          createdAt: doc.data().createdAt?.toDate() || new Date()
+        }));
         setUpcomingExercises(exercises);
       },
       (error) => {
@@ -77,18 +59,15 @@ export const usePatient = (): UsePatientReturn => {
     );
 
     // Subscribe to exercise history
-    const historyUnsubscribe = onSnapshot(
-      query(
-        collection(db, 'patients', auth.currentUser.uid, 'exerciseHistory'),
-        orderBy('date', 'desc'),
-        limit(10)
-      ),
+    const unsubscribeHistory = onSnapshot(
+      collection(db, 'patients', patientId, 'exerciseHistory'),
       (snapshot) => {
         const history = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          date: (doc.data().date as Timestamp).toDate()
-        })) as ExerciseHistory[];
+          date: doc.data().date?.toDate() || new Date(),
+          completedAt: doc.data().completedAt?.toDate() || new Date()
+        }));
         setExerciseHistory(history);
       },
       (error) => {
@@ -96,27 +75,14 @@ export const usePatient = (): UsePatientReturn => {
       }
     );
 
-    // Cleanup subscriptions
     return () => {
-      patientUnsubscribe();
-      exercisesUnsubscribe();
-      historyUnsubscribe();
+      unsubscribePatient();
+      unsubscribeExercises();
+      unsubscribeHistory();
     };
   }, []);
 
-  const refreshData = () => {
-    setLoading(true);
-    // The onSnapshot listeners will automatically refresh the data
-  };
-
-  return {
-    loading,
-    error,
-    patientData,
-    upcomingExercises,
-    exerciseHistory,
-    refreshData
-  };
+  return { loading, error, patientData, exerciseHistory, upcomingExercises };
 };
 
 export default usePatient;
