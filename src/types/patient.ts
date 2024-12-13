@@ -54,3 +54,14 @@ export interface ExerciseHistory {
   duration: string;
   type: string;
 }
+
+export interface Patient {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  diagnosis: string;
+  status: 'Đang điều trị' | 'Hoàn thành' | 'Tạm ngưng';
+  lastVisit?: string;
+}

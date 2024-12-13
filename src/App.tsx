@@ -8,6 +8,8 @@ import AuthDebug from './components/AuthDebug';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import DoctorPatientsPage from './pages/doctor/DoctorPatientsPage';
+import DoctorAppointmentsPage from './pages/doctor/DoctorAppointmentsPage';
 
 // Lazy load patient pages
 const PatientProfile = lazy(() => import('./pages/patient/PatientProfile'));
@@ -56,8 +58,8 @@ function App() {
 
               {/* Doctor Routes */}
               <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-              <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-              <Route path="/doctor/patients" element={<DoctorPatients />} />
+              <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
+              <Route path="/doctor/patients" element={<DoctorPatientsPage />} />
               <Route path="/doctor/treatments" element={<DoctorTreatments />} />
               <Route path="/doctor/settings" element={<DoctorSettings />} />
               <Route path="/doctor/patient/:patientId" element={<PatientDetail />} />

@@ -11,7 +11,7 @@ const DoctorNavigation = () => {
       await logout();
       navigate('/login');
     } catch (error) {
-      console.error('Failed to log out', error);
+      console.error('Đăng xuất thất bại', error);
     }
   };
 
@@ -25,25 +25,25 @@ const DoctorNavigation = () => {
             </Link>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link to="/doctor/dashboard" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                Dashboard
+                Bảng Điều Khiển
               </Link>
               <Link to="/doctor/patients" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                Patients
+                Bệnh Nhân
               </Link>
               <Link to="/doctor/appointments" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                Appointments
+                Lịch Hẹn
               </Link>
               <Link to="/doctor/treatments" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                Treatments
+                Điều Trị
               </Link>
             </div>
           </div>
           <div className="flex items-center space-x-4">
             <Link to="/doctor/settings" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-              Settings
+              Cài Đặt
             </Link>
             <button onClick={handleLogout} className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-              Logout
+              Đăng Xuất
             </button>
           </div>
         </div>

@@ -7,42 +7,18 @@ service cloud.firestore {
       return request.auth != null;
     }
     
-    // Helper function to check if user is accessing their own data
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // Add users collection rules
-    match /users/{userId} {
-      allow read, write: if isOwner(userId);
+    // Helper function to check if user is a doctor
+    function isDoctor(userId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/doctors/$(request.auth.uid));
     }
 
     // Patient collection rules
     match /patients/{patientId} {
-      allow read, write: if isOwner(patientId);
-      
-      // Add specific rules for exercises subcollection
-      match /exercises/{exerciseId} {
-        allow read, write: if isOwner(patientId);
-      }
-      
-      // Add specific rules for exercise history subcollection
-      match /exerciseHistory/{historyId} {
-        allow read, write: if isOwner(patientId);
-      }
-      
-      match /appointments/{appointmentId} {
-        allow read, write: if isOwner(patientId);
-      }
-    }
-
-    // Doctor collection rules
-    match /doctors/{doctorId} {
-      allow read, write: if isOwner(doctorId);
-      
-      match /patients/{patientId} {
-        allow read, write: if isOwner(doctorId);
-      }
+      // Allow doctors to read their patients
+      allow read: if isDoctor(request.auth.uid) && 
+                    resource.data.doctorId == request.auth.uid;
+      allow write: if isDoctor(request.auth.uid);
     }
   }
 }

@@ -43,26 +43,26 @@ const HomePage = () => {
   const features = [
     {
       icon: <Camera className="w-6 h-6 text-blue-600" />,
-      title: "Real-time Pose Tracking",
-      description: "Advanced AI-powered pose estimation for precise movement analysis and guidance",
+      title: "Theo Dõi Tư Thế Thời Gian Thực",
+      description: "Phân tích chuyển động chính xác bằng AI để hướng dẫn và đánh giá tư thế",
       bgColor: "bg-blue-50"
     },
     {
       icon: <Brain className="w-6 h-6 text-purple-600" />,
-      title: "Smart Exercise Adaptation",
-      description: "Personalized exercise routines that adapt to your progress and capabilities",
+      title: "Điều Chỉnh Bài Tập Thông Minh",
+      description: "Chương trình tập luyện được cá nhân hóa thích ứng với tiến độ và khả năng của bạn",
       bgColor: "bg-purple-50"
     },
     {
       icon: <LineChart className="w-6 h-6 text-green-600" />,
-      title: "Progress Analytics",
-      description: "Comprehensive progress tracking with detailed performance metrics",
+      title: "Phân Tích Tiến Độ",
+      description: "Theo dõi tiến độ toàn diện với các chỉ số hiệu suất chi tiết",
       bgColor: "bg-green-50"
     },
     {
       icon: <Shield className="w-6 h-6 text-red-600" />,
-      title: "Secure & Private",
-      description: "HIPAA-compliant platform ensuring your medical data stays protected",
+      title: "An Toàn & Riêng Tư",
+      description: "Nền tảng tuân thủ HIPAA đảm bảo dữ liệu y tế của bạn được bảo vệ",
       bgColor: "bg-red-50"
     }
   ];
@@ -70,20 +70,20 @@ const HomePage = () => {
   const steps = [
     {
       step: "1",
-      title: "Setup Your Profile",
-      description: "Create your account and tell us about your rehabilitation needs",
+      title: "Thiết Lập Hồ Sơ",
+      description: "Tạo tài khoản và cho chúng tôi biết về nhu cầu phục hồi của bạn",
       icon: <Users className="w-8 h-8 text-blue-600" />
     },
     {
       step: "2",
-      title: "Follow Guided Exercises",
-      description: "Get real-time feedback as you perform your prescribed exercises",
+      title: "Làm Theo Bài Tập Hướng Dẫn",
+      description: "Nhận phản hồi thời gian thực khi thực hiện các bài tập được chỉ định",
       icon: <Activity className="w-8 h-8 text-blue-600" />
     },
     {
       step: "3",
-      title: "Track Your Progress",
-      description: "Monitor your improvement with detailed analytics and reports",
+      title: "Theo Dõi Tiến Độ",
+      description: "Giám sát sự cải thiện với báo cáo và phân tích chi tiết",
       icon: <LineChart className="w-8 h-8 text-blue-600" />
     }
   ];
@@ -102,7 +102,7 @@ const HomePage = () => {
             </div>
 
             <div className="hidden md:flex items-center space-x-8">
-              {['Features', 'How it Works', 'Testimonials'].map((item) => (
+              {['Tính Năng', 'Cách Hoạt Động', 'Đánh Giá'].map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase().replace(' ', '-')}`}
@@ -117,7 +117,7 @@ const HomePage = () => {
                 onClick={handleGetStarted}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
-                Get Started
+                Bắt Đầu Ngay
               </button>
             </div>
 
@@ -137,25 +137,25 @@ const HomePage = () => {
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-8">
-            <span className="block">Transform Your Recovery</span>
-            <span className="block text-blue-200 mt-2">With AI-Powered Guidance</span>
+            <span className="block">Chuyển Đổi Quá Trình Phục Hồi</span>
+            <span className="block text-blue-200 mt-2">Với Hướng Dẫn Từ AI</span>
           </h1>
           <p className="mt-3 max-w-md mx-auto text-xl text-gray-200 sm:text-2xl md:mt-5 md:max-w-3xl">
-            Experience the future of physical rehabilitation with real-time feedback and personalized guidance.
+            Trải nghiệm tương lai của phục hồi chức năng với phản hồi thời gian thực và hướng dẫn cá nhân hóa.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
             <button 
               onClick={handleStartTrial}
               className="px-8 py-4 bg-white text-blue-600 rounded-lg font-bold hover:bg-blue-50 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center"
             >
-              Start Free Trial
+              Dùng Thử Miễn Phí
               <ArrowRight className="ml-2 w-5 h-5" />
             </button>
             <button 
               onClick={handleWatchDemo}
               className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transform hover:scale-105 transition-all duration-300 flex items-center justify-center"
             >
-              Watch Demo
+              Xem Demo
               <Play className="ml-2 w-5 h-5" />
             </button>
           </div>
@@ -270,13 +270,13 @@ const HomePage = () => {
       <footer className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {['Product', 'Support', 'Company', 'Legal'].map((section) => (
+            {['Sản Phẩm', 'Hỗ Trợ', 'Công Ty', 'Pháp Lý'].map((section) => (
               <div key={section}>
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">
                   {section}
                 </h3>
                 <ul className="mt-4 space-y-4">
-                  {['Features', 'Documentation'].map((item) => (
+                  {['Tính Năng', 'Tài Liệu'].map((item) => (
                     <li key={item}>
                       <a href="#" className="text-base text-gray-500 hover:text-gray-900">
                         {item}
@@ -289,7 +289,7 @@ const HomePage = () => {
           </div>
           <div className="mt-8 border-t border-gray-200 pt-8">
             <p className="text-base text-gray-400 text-center">
-              &copy; 2024 MedRehab. All rights reserved.
+              &copy; 2024 MedRehab. Đã đăng ký bản quyền.
             </p>
           </div>
         </div>
